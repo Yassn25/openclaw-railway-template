@@ -11,4 +11,12 @@ fi
 rm -rf /home/linuxbrew/.linuxbrew
 ln -sfn /data/.linuxbrew /home/linuxbrew/.linuxbrew
 
+mkdir -p /data/logs
+chown -R openclaw:openclaw /data/logs
+
+if [ -f /data/bin/openclaw-pid-guard.py ]; then
+  gosu openclaw sh -c 'while true; do python3 /data/bin/openclaw-pid-guard.py; sleep 120; done' \
+    >> /data/logs/pid-guard-runner.log 2>&1 &
+fi
+
 exec gosu openclaw node src/server.js
