@@ -24,3 +24,6 @@ await route({path:'/openclaw',query:{}},{redirect:x=>redirects.push(x)});
 assert.deepEqual(redirects,[],'Anonymous UI request leaked token in redirect');
 assert.equal(proxy.forwarded,true);
 console.log('PASS: HTTP and WebSocket preserve absent/valid/invalid caller auth; UI does not redirect with server token.');
+
+const boot=source.slice(source.indexOf("const server = app.listen("),source.indexOf('server.on("upgrade"'));
+assert.ok(!boot.includes('clawArgs(["doctor", "--fix"])'),"Boot must not implicitly repair production config");
