@@ -405,14 +405,13 @@ async function startGateway() {
     "run",
     "--bind",
     // Intentional for Railway: only the wrapper is public, and it proxies to the
-    // gateway over loopback while injecting auth.
+    // gateway over loopback while preserving caller authentication.
     "loopback",
     "--port",
     String(INTERNAL_GATEWAY_PORT),
     "--auth",
     "token",
-    "--token",
-    OPENCLAW_GATEWAY_TOKEN,
+    // The existing environment SecretRef supplies auth without exposing a CLI argument.
     "--allow-unconfigured",
   ];
 

@@ -27,3 +27,9 @@ console.log('PASS: HTTP and WebSocket preserve absent/valid/invalid caller auth;
 
 const boot=source.slice(source.indexOf("const server = app.listen("),source.indexOf('server.on("upgrade"'));
 assert.ok(!boot.includes('clawArgs(["doctor", "--fix"])'),"Boot must not implicitly repair production config");
+
+const gatewayStart=source.slice(source.indexOf("async function startGateway()"),source.indexOf("gatewayLastStartTime = Date.now()",source.indexOf("async function startGateway()")));
+const arraySource=gatewayStart.slice(gatewayStart.indexOf("const args = ["))+"\nreturn args;";
+const startupArgs=new Function("INTERNAL_GATEWAY_PORT","OPENCLAW_GATEWAY_TOKEN",arraySource)(18789,"BSF_FAKE_PROCESS_SECRET");
+assert.ok(!startupArgs.includes("--token"),"Gateway token must not be a command-line argument");
+assert.ok(!JSON.stringify(startupArgs).includes("BSF_FAKE_PROCESS_SECRET"));

@@ -5,6 +5,7 @@ on:
       - 'src/server.js'
       - 'Dockerfile'
       - 'test-wrapper-auth.mjs'
+      - 'test-runtime-auth.mjs'
       - '.github/workflows/gateway-security.yml'
 permissions:
   contents: read
@@ -22,6 +23,8 @@ jobs:
           node test-wrapper-auth.mjs
       - name: Build security image
         run: docker build --progress=plain -t openclaw-security-check .
+      - name: Verify environment SecretRef in the built runtime
+        run: docker run --rm --interactive --network none --entrypoint node openclaw-security-check --input-type=module - < test-runtime-auth.mjs
       - name: Verify wrapper startup with empty isolated state
         shell: bash
         run: |
