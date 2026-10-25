@@ -1766,9 +1766,7 @@ const PROXY_ORIGIN = process.env.RAILWAY_PUBLIC_DOMAIN
   : GATEWAY_TARGET;
 
 proxy.on("proxyReq", (proxyReq, req, res) => {
-  if (!req.url?.startsWith("/hooks/")) {
-    proxyReq.setHeader("Authorization", `Bearer ${OPENCLAW_GATEWAY_TOKEN}`);
-  }
+  // Preserve caller authentication; never grant the server credential to a request.
   proxyReq.setHeader("Origin", PROXY_ORIGIN);
   rebuildForwardedHeaders(
     proxyReq,
@@ -1778,7 +1776,7 @@ proxy.on("proxyReq", (proxyReq, req, res) => {
 });
 
 proxy.on("proxyReqWs", (proxyReq, req, socket, options, head) => {
-  proxyReq.setHeader("Authorization", `Bearer ${OPENCLAW_GATEWAY_TOKEN}`);
+  // WebSocket authentication must come from the client or Gateway protocol.
   proxyReq.setHeader("Origin", PROXY_ORIGIN);
   rebuildForwardedHeaders(
     proxyReq,
@@ -1819,10 +1817,6 @@ app.use(async (req, res) => {
           .sendFile(path.join(process.cwd(), "src", "public", "loading.html"));
       }
     }
-  }
-
-  if (req.path === "/openclaw" && !req.query.token) {
-    return res.redirect(`/openclaw?token=${OPENCLAW_GATEWAY_TOKEN}`);
   }
 
   return proxy.web(req, res, { target: GATEWAY_TARGET });
