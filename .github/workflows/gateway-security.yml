@@ -1,0 +1,39 @@
+name: Gateway security check
+on:
+  pull_request:
+    paths:
+      - 'src/server.js'
+      - 'Dockerfile'
+      - 'test-wrapper-auth.mjs'
+      - '.github/workflows/gateway-security.yml'
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - name: Check wrapper security boundary
+        run: |
+          node --check src/server.js
+          node test-wrapper-auth.mjs
+      - name: Build security image
+        run: docker build --progress=plain -t openclaw-security-check .
+      - name: Verify wrapper startup with empty isolated state
+        shell: bash
+        run: |
+          set -eu
+          trap 'docker rm -f openclaw-security-smoke >/dev/null 2>&1 || true' EXIT
+          docker run --detach --name openclaw-security-smoke --network none --tmpfs /data:rw,size=1g openclaw-security-check >/dev/null
+          for attempt in $(seq 1 40); do
+            if docker exec openclaw-security-smoke node -e 'fetch("http://127.0.0.1:8080/setup/healthz").then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))' >/dev/null 2>&1; then
+              echo 'Isolated wrapper health passed; no production state or credentials used.'
+              exit 0
+            fi
+            sleep 3
+          done
+          echo 'Isolated wrapper health failed; raw logs withheld.'
+          exit 1
