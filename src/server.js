@@ -1830,14 +1830,7 @@ const server = app.listen(PORT, () => {
 
   if (isConfigured()) {
     (async () => {
-      try {
-        log.info("wrapper", "running openclaw doctor --fix...");
-        const dr = await runCmd(OPENCLAW_NODE, clawArgs(["doctor", "--fix"]));
-        log.info("wrapper", `doctor --fix exit=${dr.code}`);
-        if (dr.output) log.info("wrapper", dr.output);
-      } catch (err) {
-        log.warn("wrapper", `doctor --fix failed: ${err.message}`);
-      }
+      // Configuration repair is an explicit maintenance action, not a startup side effect.
       await ensureGatewayRunning();
     })().catch((err) => {
       log.error("wrapper", `failed to start gateway at boot: ${err.message}`);
