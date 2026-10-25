@@ -1,4 +1,4 @@
-FROM node:26-bookworm
+FROM node:26-bookworm@sha256:2aaae6d91f99fee84cfc92da9b52c22a185752d247746052bbc3f961e44478c6
 
 RUN apt-get update \
   && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
@@ -19,7 +19,7 @@ RUN npm install -g \
     openclaw@2026.9.4 \
   && node --version | grep -Eq '^v26\.' \
   && openclaw --version | grep -Eq '^OpenClaw 2026\.9\.4( |$)'
-RUN npm install -g clawhub@latest
+RUN npm install -g clawhub@0.23.3
 
 WORKDIR /app
 
