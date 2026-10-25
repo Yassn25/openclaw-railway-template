@@ -1,6 +1,9 @@
 #!/bin/bash
 set -e
 
+# Keep new agent state and transcripts private to their owning user.
+umask 077
+
 chown -R openclaw:openclaw /data
 chmod 700 /data
 
